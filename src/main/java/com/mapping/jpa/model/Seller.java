@@ -3,15 +3,13 @@ package com.mapping.jpa.model;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
-import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 
 @Entity
 public class Seller extends User {
 	
 	@OneToOne(optional=false, cascade= {CascadeType.MERGE})
-	@MapsId
-	@JoinColumn(nullable=false)
+	@JoinColumn(nullable=false, unique=true)
 	private ExternalAccount externalAccount;
 
 	public ExternalAccount getExternalAccount() {

@@ -9,35 +9,39 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.mapping.jpa.dao.BuyerDao;
-import com.mapping.jpa.dao.SellerDao;
+import com.mapping.jpa.service.BuyerService;
+import com.mapping.jpa.service.SellerService;
 
 @RunWith(SpringRunner.class)
-@DataJpaTest
+@SpringBootTest
+@AutoConfigureTestEntityManager
 @DirtiesContext(classMode=ClassMode.AFTER_EACH_TEST_METHOD)
+@Transactional
 public class BuyerSellerTest {
 	
 	@Autowired
 	private TestEntityManager entityManager;
 	
 	@Autowired
-	private BuyerDao buyerDao;
+	private BuyerService buyerService;
 	
 	@Autowired
-	private SellerDao sellerDao;
+	private SellerService sellerService;
 	
 	@Rule
 	public ExpectedException expected = ExpectedException.none();
 	
 	@Test
 	public void shouldNotSaveTwoBuyersWithTheSameExternalAccount() {
-		buyerDao.save(getFullBuyer());
+		buyerService.save(getFullBuyer());
 		
 		Buyer savedBuyer = entityManager.find(Buyer.class, 1L);
 		ExternalAccount savedExternalAccount = savedBuyer.getExternalAccount();
@@ -45,12 +49,12 @@ public class BuyerSellerTest {
 		assertThat(savedExternalAccount.getId()).isEqualTo(123L);
 		
 		expected.expect(Exception.class);
-		buyerDao.save(getFullBuyer());
+		buyerService.save(getFullBuyer());
 	}
 	
 	@Test
 	public void shouldNotSaveTwoSellersWithTheSameExternalAccount() {
-		sellerDao.save(getFullSeller());
+		sellerService.save(getFullSeller());
 		
 		Seller savedSeller = entityManager.find(Seller.class, 1L);
 		ExternalAccount savedExternalAccount = savedSeller.getExternalAccount();
@@ -58,19 +62,19 @@ public class BuyerSellerTest {
 		assertThat(savedExternalAccount.getId()).isEqualTo(123L);
 		
 		expected.expect(Exception.class);
-		sellerDao.save(getFullSeller());
+		sellerService.save(getFullSeller());
 	}
 	
 	@Test
 	public void shouldSaveOneBuyerAndOneSellerWithTheSameExternalAccount() {
-		buyerDao.save(getFullBuyer());
+		buyerService.save(getFullBuyer());
 		
 		Buyer savedBuyer = entityManager.find(Buyer.class, 1L);
 		ExternalAccount savedExternalAccount = savedBuyer.getExternalAccount();
 		assertThat(savedExternalAccount).isNotNull();
 		assertThat(savedExternalAccount.getId()).isEqualTo(123L);
 		
-		sellerDao.save(getFullSeller());
+		sellerService.save(getFullSeller());
 		
 		Seller savedSeller = entityManager.find(Seller.class, 1L);
 		savedExternalAccount = savedSeller.getExternalAccount();
@@ -80,32 +84,32 @@ public class BuyerSellerTest {
 	
 	@Test
 	public void shouldNotSaveTwoBuyersAndOneSellerWithTheSameExternalAccount() {
-		buyerDao.save(getFullBuyer());
+		buyerService.save(getFullBuyer());
 		
 		Buyer savedBuyer = entityManager.find(Buyer.class, 1L);
 		ExternalAccount savedExternalAccount = savedBuyer.getExternalAccount();
 		assertThat(savedExternalAccount).isNotNull();
 		assertThat(savedExternalAccount.getId()).isEqualTo(123L);
 		
-		sellerDao.save(getFullSeller());
+		sellerService.save(getFullSeller());
 		
 		expected.expect(Exception.class);
-		buyerDao.save(getFullBuyer());
+		buyerService.save(getFullBuyer());
 	}
 	
 	@Test
 	public void shouldNotSaveOneBuyerAndTwoSellersWithTheSameExternalAccount() {
-		buyerDao.save(getFullBuyer());
+		buyerService.save(getFullBuyer());
 		
 		Buyer savedBuyer = entityManager.find(Buyer.class, 1L);
 		ExternalAccount savedExternalAccount = savedBuyer.getExternalAccount();
 		assertThat(savedExternalAccount).isNotNull();
 		assertThat(savedExternalAccount.getId()).isEqualTo(123L);
 		
-		sellerDao.save(getFullSeller());
+		sellerService.save(getFullSeller());
 		
 		expected.expect(Exception.class);
-		sellerDao.save(getFullSeller());
+		sellerService.save(getFullSeller());
 	}
 
 	private Buyer getFullBuyer() {
